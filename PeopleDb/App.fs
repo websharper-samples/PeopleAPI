@@ -49,15 +49,13 @@ module Model =
         /// Accepts requests to /api/...
         | [<EndPoint "/api">] Api of ApiEndPoint
 
-    /// Type used for all JSON responses to indicate success or failure.
-    [<NamedUnionCases "result">]
-    type Result<'T> =
+    /// Error result value.
+    type Error = { error : string }
 
-        /// JSON: { "result": "success", /* fields of 'T... */ }
-        | [<Name "success">] Success of 'T
-
-        /// JSON: { "result": "failure", "message": "error message..." }
-        | [<Name "failure">] Failure of message: string
+    /// Alias representing the success or failure of an operation.
+    /// The Ok case contains a success value to return as JSON.
+    /// The Error case contains an HTTP status and a JSON error to return.
+    type ApiResult<'T> = Result<'T, Http.Status * Error>
 
     /// Result value for CreatePerson.
     type Id = { id : int }
@@ -76,33 +74,36 @@ module Backend =
     /// The highest id used so far, incremented each time a person is POSTed.
     let private lastId = ref 0
 
-    let GetPerson (id: int) : Result<PersonData> =
+    let personNotFound() : ApiResult<'T> =
+        Error (Http.Status.NotFound, { error = "Person not found." })
+
+    let GetPerson (id: int) : ApiResult<PersonData> =
         lock people <| fun () ->
             match people.TryGetValue(id) with
-            | true, person -> Success person
-            | false, _ -> Failure "Person not found."
+            | true, person -> Ok person
+            | false, _ -> personNotFound()
 
-    let CreatePerson (data: PersonData) : Result<Id> =
+    let CreatePerson (data: PersonData) : ApiResult<Id> =
         lock people <| fun () ->
             incr lastId
             people.[!lastId] <- data
-            Success { id = !lastId }
+            Ok { id = !lastId }
 
-    let EditPerson (id: int) (data: PersonData) : Result<option<unit>> =
+    let EditPerson (id: int) (data: PersonData) : ApiResult<Id> =
         lock people <| fun () ->
             match people.TryGetValue(id) with
             | true, _ ->
                 people.[id] <- data
-                Success None
-            | false, _ -> Failure "Person not found."
+                Ok { id = id }
+            | false, _ -> personNotFound()
 
-    let DeletePerson (id: int) : Result<option<unit>> =
+    let DeletePerson (id: int) : ApiResult<Id> =
         lock people <| fun () ->
             match people.TryGetValue(id) with
             | true, _ ->
                 people.Remove(id) |> ignore
-                Success None
-            | false, _ -> Failure "Person not found."
+                Ok { id = id }
+            | false, _ -> personNotFound()
 
     // On application startup, pre-fill the database with a few people.
     do List.iter (CreatePerson >> ignore) [
@@ -130,13 +131,14 @@ module Site =
     open WebSharper.UI.Html
     open WebSharper.UI.Server
 
-    let JsonContent (result: Result<'T>) =
-        Content.Json result
-        |> Content.SetStatus (
-            match result with
-            | Success _ -> Http.Status.Ok
-            | Failure _ -> Http.Status.NotFound
-        )
+    let JsonContent (result: ApiResult<'T>) =
+        match result with
+        | Ok value ->
+            Content.Json value
+        | Error (status, error) ->
+            Content.Json error
+            |> Content.SetStatus status
+        |> Content.WithContentType "application/json"
 
     let ApiContent (ep: ApiEndPoint) =
         match ep with
