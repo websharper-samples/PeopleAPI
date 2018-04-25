@@ -64,6 +64,16 @@ There are plenty of ways you can extend this application to try your hand at Web
 
     You can use either `list<Person>` or `Person[]` as a representation for a JSON array.
 
+- Add pagination to the above.
+
+    For this, you'll probably want to use query parameters, such as `GET /api/people?pageId=3`. You can do so using the `Query` attribute on your endpoint:
+    
+    ```fsharp
+    type ApiEndPoint =
+        | [<EndPoint "GET /api/people"; Query "pageId">]
+            GetPeople of pageId: option<int>
+    ```
+
 - Add a `PATCH /api/people/{id}` which allows setting only some fields of a person (as opposed to `PUT` which sets all fields).
 
     You'll need to create a new record type, which will be similar to `Person` except that all its fields should be optional.
