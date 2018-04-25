@@ -131,7 +131,8 @@ module Site =
     open WebSharper.UI.Html
     open WebSharper.UI.Server
 
-    let JsonContent (result: ApiResult<'T>) =
+    /// Helper function to convert our internal ApiResult type into WebSharper Content.
+    let JsonContent (result: ApiResult<'T>) : Async<Content<EndPoint>> =
         match result with
         | Ok value ->
             Content.Json value
@@ -140,7 +141,9 @@ module Site =
             |> Content.SetStatus status
         |> Content.WithContentType "application/json"
 
-    let ApiContent (ep: ApiEndPoint) =
+    /// Respond to an ApiEndPoint by calling the corresponding backend function
+    /// and converting the result into Content.
+    let ApiContent (ep: ApiEndPoint) : Async<Content<EndPoint>> =
         match ep with
         | GetPerson id ->
             JsonContent (Backend.GetPerson id)
@@ -151,7 +154,8 @@ module Site =
         | DeletePerson id ->
             JsonContent (Backend.DeletePerson id)
 
-    let HomePage (ctx: Context<EndPoint>) =
+    /// A simple HTML home page.
+    let HomePage (ctx: Context<EndPoint>) : Async<Content<EndPoint>> =
         // Type-safely creates the URI: "/api/people/1"
         let person1Link = ctx.Link (Api (GetPerson 1))
         Content.Page(
@@ -164,7 +168,9 @@ module Site =
             ]
         )
 
-    let Main =
+    /// The Sitelet parses requests into EndPoint values
+    /// and dispatches them to the content function.
+    let Main : Sitelet<EndPoint> =
         Application.MultiPage (fun ctx endpoint ->
             match endpoint with
             | Home -> HomePage ctx
