@@ -11,6 +11,7 @@ module Model =
     /// Data about a person. Used both for storage and JSON parsing/writing.
     type PersonData =
         {
+            id: int
             firstName: string
             lastName: string
             [<DateTimeFormat "yyyy-MM-dd">]
@@ -86,7 +87,7 @@ module Backend =
     let CreatePerson (data: PersonData) : ApiResult<Id> =
         lock people <| fun () ->
             incr lastId
-            people.[!lastId] <- data
+            people.[!lastId] <- { data with id = !lastId }
             Ok { id = !lastId }
 
     let EditPerson (id: int) (data: PersonData) : ApiResult<Id> =
@@ -107,19 +108,23 @@ module Backend =
 
     // On application startup, pre-fill the database with a few people.
     do List.iter (CreatePerson >> ignore) [
-        { firstName = "Alonzo"
+        { id = 0
+          firstName = "Alonzo"
           lastName = "Church"
           born = DateTime(1903, 6, 14)
           died = Some(DateTime(1995, 8, 11)) }
-        { firstName = "Alan"
+        { id = 0
+          firstName = "Alan"
           lastName = "Turing"
           born = DateTime(1912, 6, 23)
           died = Some(DateTime(1954, 6, 7)) }
-        { firstName = "Bertrand"
+        { id = 0
+          firstName = "Bertrand"
           lastName = "Russell"
           born = DateTime(1872, 5, 18)
           died = Some(DateTime(1970, 2, 2)) }
-        { firstName = "Noam"
+        { id = 0
+          firstName = "Noam"
           lastName = "Chomsky"
           born = DateTime(1928, 12, 7)
           died = None }
