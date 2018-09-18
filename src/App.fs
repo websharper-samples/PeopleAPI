@@ -25,6 +25,10 @@ module Model =
     /// This defines the set of requests accepted by our API.
     type ApiEndPoint =
 
+        /// Accepts GET requests to /people
+        | [<EndPoint "GET /people">]
+            GetPeople
+
         /// Accepts GET requests to /people/{id}
         | [<EndPoint "GET /people">]
             GetPerson of id: int
@@ -33,9 +37,9 @@ module Model =
         | [<EndPoint "POST /people"; Json "personData">]
             CreatePerson of personData: PersonData
 
-        /// Accepts PUT requests to /people/{id} with PersonData as JSON body
+        /// Accepts PUT requests to /people with PersonData as JSON body
         | [<EndPoint "PUT /people"; Json "personData">]
-            EditPerson of id: int * personData: PersonData
+            EditPerson of personData: PersonData
 
         /// Accepts DELETE requests to /people/{id}
         | [<EndPoint "DELETE /people">]
@@ -78,6 +82,13 @@ module Backend =
     let personNotFound() : ApiResult<'T> =
         Error (Http.Status.NotFound, { error = "Person not found." })
 
+    let GetPeople () : ApiResult<PersonData[]> =
+        lock people <| fun () ->
+            people
+            |> Seq.map (fun (KeyValue(_, person)) -> person)
+            |> Array.ofSeq
+            |> Ok
+
     let GetPerson (id: int) : ApiResult<PersonData> =
         lock people <| fun () ->
             match people.TryGetValue(id) with
@@ -90,12 +101,12 @@ module Backend =
             people.[!lastId] <- { data with id = !lastId }
             Ok { id = !lastId }
 
-    let EditPerson (id: int) (data: PersonData) : ApiResult<Id> =
+    let EditPerson (data: PersonData) : ApiResult<Id> =
         lock people <| fun () ->
-            match people.TryGetValue(id) with
+            match people.TryGetValue(data.id) with
             | true, _ ->
-                people.[id] <- data
-                Ok { id = id }
+                people.[data.id] <- data
+                Ok { id = data.id }
             | false, _ -> personNotFound()
 
     let DeletePerson (id: int) : ApiResult<Id> =
@@ -150,12 +161,14 @@ module Site =
     /// and converting the result into Content.
     let ApiContent (ep: ApiEndPoint) : Async<Content<EndPoint>> =
         match ep with
+        | GetPeople ->
+            JsonContent (Backend.GetPeople ())
         | GetPerson id ->
             JsonContent (Backend.GetPerson id)
         | CreatePerson personData ->
             JsonContent (Backend.CreatePerson personData)
-        | EditPerson (id, personData) ->
-            JsonContent (Backend.EditPerson id personData)
+        | EditPerson personData ->
+            JsonContent (Backend.EditPerson personData)
         | DeletePerson id ->
             JsonContent (Backend.DeletePerson id)
 
