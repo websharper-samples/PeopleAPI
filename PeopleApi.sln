@@ -3,7 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "PeopleDb", "PeopleDb\PeopleDb.fsproj", "{A6659AF0-62AE-4EE4-A69D-E6B69D6E4067}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{9E4C364D-CE6A-4244-BB9A-06ED7E6ECEF2}"
+	ProjectSection(SolutionItems) = preProject
+		paket.dependencies = paket.dependencies
+	EndProjectSection
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "PeopleApi", "src\PeopleApi.fsproj", "{A6659AF0-62AE-4EE4-A69D-E6B69D6E4067}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

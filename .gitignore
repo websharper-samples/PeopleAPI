@@ -1,5 +1,8 @@
 bin/
 obj/
+Content/
+Scripts/
+paket-files/
 .vs/
 *.user
 launchSettings.json

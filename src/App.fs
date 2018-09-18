@@ -1,4 +1,4 @@
-module PeopleDb.App
+module PeopleApi.App
 
 open System
 open System.Collections.Generic

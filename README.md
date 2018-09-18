@@ -36,15 +36,16 @@ DELETE /api/person/43                 | 200 OK
 
 ## Building and starting the application
 
-Simply run the following command:
+Simply run the following commands:
 
 ```
-dotnet run -p PeopleDb
+cd src
+dotnet run
 ```
 
 ## Code walkthrough
 
-The API is implemented in [App.fs](PeopleDb/App.fs).
+The API is implemented in [App.fs](src/App.fs).
 
 - The module `Model` contains the types used by our application:
     - `EndPoint` and `ApiEndPoint` together describe the endpoints of the API. They describe the accepted URLs and JSON bodies.

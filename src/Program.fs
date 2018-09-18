@@ -1,4 +1,4 @@
-namespace PeopleDb
+namespace PeopleApi
 
 open System
 open System.Collections.Generic
