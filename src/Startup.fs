@@ -22,15 +22,12 @@ type Startup() =
 
     member this.ConfigureServices(services: IServiceCollection) =
         services.AddSitelet<Website>()
-                .AddAuthentication("WebSharper")
-                .AddCookie("WebSharper", fun options -> ())
         |> ignore
 
     member this.Configure(app: IApplicationBuilder, env: IHostingEnvironment) =
         if env.IsDevelopment() then app.UseDeveloperExceptionPage() |> ignore
 
-        app.UseAuthentication()
-            .UseStaticFiles()
+        app.UseStaticFiles()
             .UseWebSharper()
             .Run(fun context ->
                 context.Response.StatusCode <- 404

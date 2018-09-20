@@ -4,7 +4,8 @@ storage: none
 framework: netcoreapp2.0
 
 nuget FSharp.Core
-nuget Microsoft.AspNetCore.All 2.0.5
+nuget Microsoft.AspNetCore ~> 2.1.0
+nuget Microsoft.AspNetCore.StaticFiles ~> 2.1.0
 nuget WebSharper
 nuget WebSharper.AspNetCore
 nuget WebSharper.FSharp

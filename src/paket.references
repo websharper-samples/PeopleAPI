@@ -1,6 +1,7 @@
-Microsoft.AspNetCore.All
+Microsoft.AspNetCore
 WebSharper
 WebSharper.FSharp
 WebSharper.UI
 WebSharper.AspNetCore
 FSharp.Core
+Microsoft.AspNetCore.StaticFiles
