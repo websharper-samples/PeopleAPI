@@ -14,10 +14,8 @@ module Model =
             id: int
             firstName: string
             lastName: string
-            [<DateTimeFormat "yyyy-MM-dd">]
             born: System.DateTime
             /// Since this is an option, this field is only present in JSON for Some value.
-            [<DateTimeFormat "yyyy-MM-dd">]
             died: option<System.DateTime>
         }
 
@@ -52,7 +50,7 @@ module Model =
         | [<EndPoint "/">] Home
 
         /// Accepts requests to /api/...
-        | [<EndPoint "/api">] Api of ApiEndPoint
+        | [<EndPoint "/api">] Api of Cors<ApiEndPoint>
 
     /// Error result value.
     type Error = { error : string }
@@ -175,7 +173,7 @@ module Site =
     /// A simple HTML home page.
     let HomePage (ctx: Context<EndPoint>) : Async<Content<EndPoint>> =
         // Type-safely creates the URI: "/api/people/1"
-        let person1Link = ctx.Link (Api (GetPerson 1))
+        let person1Link = ctx.Link (Api (Cors.Of (GetPerson 1)))
         Content.Page(
             Body = [
                 p [] [text "API is running."]
@@ -188,9 +186,15 @@ module Site =
 
     /// The Sitelet parses requests into EndPoint values
     /// and dispatches them to the content function.
-    let Main : Sitelet<EndPoint> =
+    let Main corsAllowedOrigins : Sitelet<EndPoint> =
         Application.MultiPage (fun ctx endpoint ->
             match endpoint with
             | Home -> HomePage ctx
-            | Api api -> ApiContent api
+            | Api api ->
+                Content.Cors api (fun allows ->
+                    { allows with
+                        Origins = corsAllowedOrigins
+                        Headers = ["Content-Type"]
+                    }
+                ) ApiContent
         )
