@@ -1,5 +1,0 @@
-type project
-licenseUrl https://www.apache.org/licenses/
-authors The WebSharper team
-description
-    A simple REST API implemented with WebSharper

@@ -1,13 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk.Web">
+
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    <WebSharperProject>Website</WebSharperProject>
-    <WebProjectOutputDir>$(MSBuildThisFileDirectory)/wwwroot</WebProjectOutputDir>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>PeopleApi</AssemblyName>
   </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="App.fs" />
     <Compile Include="Startup.fs" />
+    <None Include="wsconfig.json" />
+    <None Include="appsettings.json" />
   </ItemGroup>
-  <Import Project="..\.paket\Paket.Restore.targets" />
+
+  <ItemGroup>
+    <PackageReference Include="WebSharper" Version="10.1.9.686" />
+    <PackageReference Include="WebSharper.FSharp" Version="10.1.9.686" />
+    <PackageReference Include="WebSharper.UI" Version="10.1.7.686" />
+    <PackageReference Include="WebSharper.AspNetCore" Version="10.1.9.686" />
+  </ItemGroup>
+
 </Project>

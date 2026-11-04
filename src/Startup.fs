@@ -1,45 +1,35 @@
-namespace PeopleApi
-
-open Microsoft.AspNetCore
 open Microsoft.AspNetCore.Builder
-open Microsoft.AspNetCore.Hosting
-open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
+open Microsoft.Extensions.Hosting
 open WebSharper.AspNetCore
+open PeopleApi
 
-type Website(config: IConfiguration) =
-    inherit SiteletService<App.Model.EndPoint>()
+[<EntryPoint>]
+let main args =
+    let builder = WebApplication.CreateBuilder(args)
+
+    builder.Services.AddWebSharper()
+        .AddAuthentication("WebSharper")
+        .AddCookie("WebSharper", fun _ -> ())
+    |> ignore
+
+    let app = builder.Build()
 
     let corsAllowedOrigins =
-        config.GetSection("allowedOrigins").AsEnumerable()
+        app.Configuration.GetSection("allowedOrigins").AsEnumerable()
         |> Seq.map (fun kv -> kv.Value)
         |> List.ofSeq
 
-    override val Sitelet = App.Site.Main corsAllowedOrigins
+    if not (app.Environment.IsDevelopment()) then
+        app.UseExceptionHandler("/Error").UseHsts() |> ignore
 
-type Startup() =
+    app.UseHttpsRedirection()
+       .UseAuthentication()
+       .UseStaticFiles()
+       .UseWebSharper(fun ws -> ws.Sitelet(App.Site.Main corsAllowedOrigins) |> ignore)
+    |> ignore
 
-    member this.ConfigureServices(services: IServiceCollection) =
-        services.AddSitelet<Website>()
-        |> ignore
+    app.Run()
 
-    member this.Configure(app: IApplicationBuilder, env: IHostingEnvironment) =
-        if env.IsDevelopment() then app.UseDeveloperExceptionPage() |> ignore
-
-        app.UseStaticFiles()
-            .UseWebSharper()
-            .Run(fun context ->
-                context.Response.StatusCode <- 404
-                context.Response.WriteAsync("Page not found"))
-
-module Program =
-
-    [<EntryPoint>]
-    let main args =
-        WebHost
-            .CreateDefaultBuilder(args)
-            .UseStartup<Startup>()
-            .Build()
-            .Run()
-        0
+    0 // Exit code

@@ -95,9 +95,9 @@ module Backend =
 
     let CreatePerson (data: PersonData) : ApiResult<Id> =
         lock people <| fun () ->
-            incr lastId
-            people.[!lastId] <- { data with id = !lastId }
-            Ok { id = !lastId }
+            lastId.Value <- lastId.Value + 1
+            people.[lastId.Value] <- { data with id = lastId.Value }
+            Ok { id = lastId.Value }
 
     let EditPerson (data: PersonData) : ApiResult<Id> =
         lock people <| fun () ->

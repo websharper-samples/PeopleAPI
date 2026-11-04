@@ -1,2 +1,0 @@
-[config]
-command = dotnet publish -o "$DEPLOYMENT_TARGET"
