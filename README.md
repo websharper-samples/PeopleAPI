@@ -3,7 +3,7 @@
 A small CRUD REST API built with [WebSharper](https://websharper.com) sitelets on
 ASP.NET Core. It maintains an in-memory list of people and exposes it over JSON.
 
-This is the back end for the [PeopleClient](../PeopleClient) sample — together
+This is the back end for the [PeopleClient](https://github.com/websharper-samples/PeopleClient) sample — together
 they form a client/server pair, and the client references this project to share
 its model (`PersonData`, `EndPoint`, `ApiEndPoint`, …).
 
